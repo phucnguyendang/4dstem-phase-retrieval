@@ -1,0 +1,41 @@
+#  Mục tiêu: Triển khai mô hình deep learning để khôi phục phase từ các mẫu diffraction patterns(DP) thu được thông qua quá trình mô phỏng 4dstem
+# Cấu trúc dữ liệu:
+- Bao gồm 5 file dữ liệu, mỗi file chứa 700 mẫu
+- Cấu trúc file được mô tả như sau:
+    - for sample 0-699  OUTPUT: simulation_data1.h5
+    - for sample 700-1399  OUTPUT: simulation_data2.h5
+    - for sample 1400-2099  OUTPUT: simulation_data3.h5
+    - for sample 2100-2799  OUTPUT: simulation_data4.h5
+    - for sample 2800-3499 OUTPUT: simulation_data5.h5
+- Mỗi mẫu dữ liệu gồm 1 ảnh phase tương ứng của 1 mẫu (kích thước 100 Angstrom) và 2500 diffraction patterns được lấy mẫu trên 1 lưới 50 x 50 với sampling step là 2 Angstrom
+- Cách sinh và lưu trữ dữ liệu trong các file có thể xem trong file gendata.py
+ 
+## Model Architecture
+
+### Step 1: Patch Recovery (PatchRecoveryNet)
+- **Input**: 14×14 DP partitions from 50×50 DP grids + their coordinates
+- **Output**: 1 phase patch corresponding to sampling area of 14 x 14 diffraction patterns   
+- **Architecture**: ResNet34 backbone to extract DP to embedding and then transfer to ViT encoder and pass through CNN decoder to get output
+- The ground truth phase for calculate loss function cropped from a central piece of size 76 x 76 of np.roll(phase ,shift ,axis = (0,1))
+    Where: 
+        shift_y = probe_gpts_tuple[0] // 2 - bright_center
+        shift_x = probe_gpts_tuple[1] // 2 - bright_center
+        shift = (shift_y, shift_x)
+        bright_center = round((start_position + 13) * 2.56) # where 2.56 mean 1 Angstrom ~ 2.56 pixels~, start_position is the position scan of top-left diffraction pattern in set of 14×14 DP, start_position + 13 is position of bright center in Angstrom (because we collect 14x14 DP with sampling  step = 2)
+    Size 76 x 76 (calculated experimentally) refer to the size of the bright area that the probe illuminates on the phase corresponding to the 14x14 diffraction patterns. A pixels is considered bright if its intensity greater than 5% of the max probe intensity
+### Step 2: Phase Stitching (PhaseStitchingNet) 
+- **Input**: Multiple phase patches(each phase patch has shape 76 * 76) + their bright_center coordinates. Specifically, each sample we extract phase patch from set of 14×14 diffraction patterns with stride =9 in scan_grid 50 x50. 
+- **Output**: Full 256×256 phase images
+- **Architecture**: ViT-based + CNN decoder
+
+## Framework: Pytorch
+Hãy sử dụng các model pretrained resnet và pretrained ViT để giúp mô hình sớm hội tụ hơn
+Quá trình training như sau:
+- Training PatchRecoveryNet riêng
+- Training Phase Stitching riêng với input là groundtruth của phase patch thay vì output của mô hình PatchRecoveryNet
+- Kết hợp 2 mô hình lại để tiếp tục training end to end
+
+Hãy triển khai mã nguồn trong 3 file: #file:patchRecovery.py   để training PatchRecoveryNet, #PhaseStiching để training PhaseStitchingNet và sau đó hoàn thiện file #file:End2End.py  để tải các model đã training kết hợp lại thành 1 model end2end để tiếp tục training
+Tạo các test case trong #file:test.ipynb  để test các module mà bạn đã code 
+
+Chú ý: chỉ triển khai toàn bộ mã nguồn trong các file mà tôi đã yêu cầu. Không tạo thêm file nào khác

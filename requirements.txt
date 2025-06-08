@@ -1,0 +1,41 @@
+# Core deep learning framework
+torch>=1.12.0
+torchvision>=0.13.0
+torchaudio>=0.12.0
+
+# Transformer models
+transformers>=4.20.0
+timm>=0.6.0
+
+# Data processing
+numpy>=1.21.0
+h5py>=3.7.0
+scipy>=1.9.0
+
+# Scientific computing
+ase>=3.22.0
+
+# Visualization
+matplotlib>=3.5.0
+seaborn>=0.11.0
+plotly>=5.10.0
+
+# Progress tracking
+tqdm>=4.64.0
+dask>=2022.8.0
+
+# Electron microscopy simulation
+abtem>=1.0.0
+
+# System monitoring
+psutil>=5.9.0
+
+# Development and testing
+jupyter>=1.0.0
+ipykernel>=6.15.0
+pytest>=7.1.0
+wandb
+# Optional: For better performance
+# Install these manually if needed:
+# cupy-cuda11x  # for CUDA 11.x
+# cupy-cuda12x  # for CUDA 12.x
