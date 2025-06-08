@@ -29,13 +29,3 @@
 - **Architecture**: ViT-based + CNN decoder
 
 ## Framework: Pytorch
-Hãy sử dụng các model pretrained resnet và pretrained ViT để giúp mô hình sớm hội tụ hơn
-Quá trình training như sau:
-- Training PatchRecoveryNet riêng
-- Training Phase Stitching riêng với input là groundtruth của phase patch thay vì output của mô hình PatchRecoveryNet
-- Kết hợp 2 mô hình lại để tiếp tục training end to end
-
-Hãy triển khai mã nguồn trong 3 file: #file:patchRecovery.py   để training PatchRecoveryNet, #PhaseStiching để training PhaseStitchingNet và sau đó hoàn thiện file #file:End2End.py  để tải các model đã training kết hợp lại thành 1 model end2end để tiếp tục training
-Tạo các test case trong #file:test.ipynb  để test các module mà bạn đã code 
-
-Chú ý: chỉ triển khai toàn bộ mã nguồn trong các file mà tôi đã yêu cầu. Không tạo thêm file nào khác
